@@ -3,11 +3,13 @@
 # Niklas Semmler, 2019-03-07 20:46
 #
 
-DATA=$(patsubst src/%.py,%.pickle, $(filter-out src/data/common.py, $(wildcard src/data/*.py)))
-PLOTS=$(patsubst src/%.py,%.svg, $(filter-out src/plot/common.py, $(wildcard src/plot/*.py)))
+PFTYPE := $(if $(PFTYPE),$(PFTYPE),"svg")
+DFTYPE=pickle
+DATA=$(patsubst src/%.py,%.${DFTYPE}, $(filter-out src/data/common.py, $(wildcard src/data/*.py)))
+PLOTS=$(patsubst src/%.py,%.${PFTYPE}, $(filter-out src/plot/common.py, $(wildcard src/plot/*.py)))
 RESULTS=$(patsubst src/%.py,%.csv, $(filter-out src/result/common.py, $(wildcard src/result/*.py)))
 
-all: data plot
+all: plot
 
 data: ${DATA}
 
@@ -24,8 +26,8 @@ clean:
 	rm -f data/*
 	rm -f plot/*
 
-#plot/bar_queries_by_user.svg: data/select_data.pickle
-#	python3 src/plot/bar_queries_by_user.py
-
-#data/clean_select_data.pickle: data/select_data.pickle
+#data/clean_select_data.${DFTYPE}: data/select_data.${DFTYPE}
 #	python3 src/data/clean_select_data.py
+#
+#plot/cdf_total_result_record_count.${PFTYPE}: data/clean_select_data.${DFTYPE}
+#	python3 src/plot/cdf_total_result_record_count.py

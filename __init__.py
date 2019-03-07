@@ -23,8 +23,8 @@ def convert_to_time(string):
 
 def write_plot(figure, name):
     ftype = "svg"
-    if "PFTYPE" in os.env:
-        ftype = os.env["PFTYPE"]
+    if "PFTYPE" in os.environ:
+        ftype = os.environ["PFTYPE"]
     fpath = pjoin([os.curdir, "plot", "{}.{}".format(name, ftype)])
     print("Writing plot '{}'".format(fpath))
     figure.savefig(fpath, bbox_inches='tight')
