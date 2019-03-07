@@ -15,18 +15,24 @@ Common things that I want to use are
 - pdf/cdf/ccdf
 """
 
+def pjoin(listo):
+    return os.path.sep.join(listo)
+
+def convert_to_time(string):
+    return pd.to_datetime(string, format="%Y-%m-%d %H:%M:%S.%f")
+
 def write_plot(figure, name, ftype):
-    fpath = os.path.join([os.environ['PWD'], "plot", "{}.{}".format(name, ftype)])
+    fpath = pjoin([os.environ['PWD'], "plot", "{}.{}".format(name, ftype)])
     print("Writing plot '{}'".format(fpath))
     figure.savefig(fpath, bbox_inches='tight')
 
-def load_df(name):
-    fpath = os.path.join([os.environ['PWD'], "work", "{}.pickle".format(name)])
+def read_df(name):
+    fpath = pjoin([os.environ['PWD'], "work", "{}.pickle".format(name)])
     print("Loading dataframe '{}'".format(fpath))
     return pd.read_pickle(fpath)
 
 def write_df(df, name):
-    fpath = os.path.join([os.environ['PWD'], "work", "{}.pickle".format(name)])
+    fpath = pjoin([os.environ['PWD'], "work", "{}.pickle".format(name)])
     print("Writing dataframe '{}'".format(fpath))
     df.to_pickle(fpath)
 
