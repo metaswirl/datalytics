@@ -21,7 +21,10 @@ def pjoin(listo):
 def convert_to_time(string):
     return pd.to_datetime(string, format="%Y-%m-%d %H:%M:%S.%f")
 
-def write_plot(figure, name, ftype):
+def write_plot(figure, name):
+    ftype = "svg"
+    if "PFTYPE" in os.env:
+        ftype = os.env["PFTYPE"]
     fpath = pjoin([os.curdir, "plot", "{}.{}".format(name, ftype)])
     print("Writing plot '{}'".format(fpath))
     figure.savefig(fpath, bbox_inches='tight')
