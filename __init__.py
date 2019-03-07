@@ -22,17 +22,17 @@ def convert_to_time(string):
     return pd.to_datetime(string, format="%Y-%m-%d %H:%M:%S.%f")
 
 def write_plot(figure, name, ftype):
-    fpath = pjoin([os.environ['PWD'], "plot", "{}.{}".format(name, ftype)])
+    fpath = pjoin([os.curdir, "plot", "{}.{}".format(name, ftype)])
     print("Writing plot '{}'".format(fpath))
     figure.savefig(fpath, bbox_inches='tight')
 
 def read_df(name):
-    fpath = pjoin([os.environ['PWD'], "work", "{}.pickle".format(name)])
+    fpath = pjoin([os.curdir, "work", "{}.pickle".format(name)])
     print("Loading dataframe '{}'".format(fpath))
     return pd.read_pickle(fpath)
 
 def write_df(df, name):
-    fpath = pjoin([os.environ['PWD'], "work", "{}.pickle".format(name)])
+    fpath = pjoin([os.curdir, "work", "{}.pickle".format(name)])
     print("Writing dataframe '{}'".format(fpath))
     df.to_pickle(fpath)
 
