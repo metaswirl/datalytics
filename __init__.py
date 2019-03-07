@@ -27,12 +27,12 @@ def write_plot(figure, name, ftype):
     figure.savefig(fpath, bbox_inches='tight')
 
 def read_df(name):
-    fpath = pjoin([os.curdir, "work", "{}.pickle".format(name)])
+    fpath = pjoin([os.curdir, "data", "{}.pickle".format(name)])
     print("Loading dataframe '{}'".format(fpath))
     return pd.read_pickle(fpath)
 
 def write_df(df, name):
-    fpath = pjoin([os.curdir, "work", "{}.pickle".format(name)])
+    fpath = pjoin([os.curdir, "data", "{}.pickle".format(name)])
     print("Writing dataframe '{}'".format(fpath))
     df.to_pickle(fpath)
 
