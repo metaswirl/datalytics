@@ -11,8 +11,8 @@ touch data/raw/.gitkeep
 touch data/external/.gitkeep
 touch data/processed/.gitkeep
 touch data/result/.gitkeep
-touch references/.gitkeep
 mkdir -p src/data src/visualization src/result
 mkdir -p reports/figures
 mkdir -p references
+touch references/.gitkeep
 mkdir -p configs
