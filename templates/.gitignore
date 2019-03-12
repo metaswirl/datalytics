@@ -1,4 +1,7 @@
+*.sw?
 *.pyc
+.idea
+.snakemake
 __pycache__
 /data/processed
 /data/raw

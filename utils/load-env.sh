@@ -5,4 +5,4 @@
 #
 # Distributed under terms of the MIT license.
 #
-conda env create -f environment.yml
+conda env create -f configs/environment.yml

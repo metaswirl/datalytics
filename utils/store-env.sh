@@ -6,4 +6,4 @@
 # Distributed under terms of the MIT license.
 #
 
-conda env export > environment.yml
+conda env export > configs/environment.yml
