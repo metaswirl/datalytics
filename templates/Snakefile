@@ -1,0 +1,24 @@
+configfile: "snakemake-config.json"
+
+dfe = config['data_file_ending']
+
+rule all:
+  input:
+    expand('plot/XXX.{pfe}', pfe=config['plot_file_ending']),
+
+rule XXX:
+  input:
+    'data/transaction_summary.'+dfe
+  output:
+    'plot/XXX.{pfe}'
+  shell:
+    'python3 src/plot/{rule}.py {input} {output}'
+
+rule XXX:
+  input:
+    'XXX'
+  output:
+    'data/{rule}.'+dfe
+  shell:
+    'python3 src/data/{rule}.py {input} {output}'
+

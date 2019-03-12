@@ -21,23 +21,25 @@ def pjoin(listo):
 def convert_to_time(string):
     return pd.to_datetime(string, format="%Y-%m-%d %H:%M:%S.%f")
 
-def write_plot(figure, name):
-    ftype = "svg"
-    if "PFTYPE" in os.environ:
-        ftype = os.environ["PFTYPE"]
-    fpath = pjoin([os.curdir, "plot", "{}.{}".format(name, ftype)])
-    print("Writing plot '{}'".format(fpath))
-    figure.savefig(fpath, bbox_inches='tight')
-
-def read_df(name):
-    fpath = pjoin([os.curdir, "data", "{}.pickle".format(name)])
+def read_df(fpath):
     print("Loading dataframe '{}'".format(fpath))
-    return pd.read_pickle(fpath)
+    if fpath.endswith(".h5"):
+        return pd.read_hdf(fpath)
+    if fpath.endswith(".csv"):
+        return pd.read_csv(fpath)
+    if fpath.endswith(".pickle"):
+        return pd.read_pickle(fpath)
+    raise Exception("No reader for: " + fpath)
 
-def write_df(df, name):
-    fpath = pjoin([os.curdir, "data", "{}.pickle".format(name)])
+def write_df(df, fpath):
     print("Writing dataframe '{}'".format(fpath))
-    df.to_pickle(fpath)
+    if fpath.endswith(".h5"):
+        return pd.to_hdf(fpath, "/data")
+    if fpath.endswith(".csv"):
+        return pd.to_csv(fpath)
+    if fpath.endswith(".pickle"):
+        return pd.to_pickle(fpath)
+    raise Exception("No writer for: " + fpath)
 
 def pdf(data, col, count_col=None):
     if '__count' in data.columns:
