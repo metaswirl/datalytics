@@ -6,5 +6,5 @@
 # Distributed under terms of the MIT license.
 #
 
-rsync -auv datalytics/structure ./
+rsync -auv datalytics/structure/ ./
 

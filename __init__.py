@@ -34,11 +34,11 @@ def read_df(fpath):
 def write_df(df, fpath):
     print("Writing dataframe '{}'".format(fpath))
     if fpath.endswith(".h5"):
-        return pd.to_hdf(fpath, "/data")
+        return df.to_hdf(fpath, "/data", format='table')
     if fpath.endswith(".csv"):
-        return pd.to_csv(fpath)
+        return df.to_csv(fpath)
     if fpath.endswith(".pickle"):
-        return pd.to_pickle(fpath)
+        return df.to_pickle(fpath)
     raise Exception("No writer for: " + fpath)
 
 def pdf(data, col, count_col=None):

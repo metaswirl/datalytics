@@ -4,7 +4,7 @@ dfe = config['data_file_ending']
 
 rule all:
   input:
-    expand('report/figures/XXX.{pfe}', pfe=config['plot_file_ending']),
+    expand('reports/figures/XXX.{pfe}', pfe=config['plot_file_ending']),
 
 rule XXX:
   input:
