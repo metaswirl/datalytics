@@ -1,5 +1,9 @@
 configfile: "configs/snakemake.json"
 
+import os
+import sys
+sys.path.append(os.path.realpath(os.curdir))
+
 dfe = config['data_file_ending']
 
 rule all:
