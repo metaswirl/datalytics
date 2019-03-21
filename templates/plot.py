@@ -1,19 +1,18 @@
-import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import pandas as pd
 import datalytics as da
 import click
 
 @click.command()
-@click.argument('input_fpath', type=click.Path())
-@click.argument('output_fpath', type=click.Path())
-def main(input_fpath, output_fpath):
-    df = da.read_df(input_fpath)
+@click.option('--input', 'input_files', type=click.Path(), required=True)
+@click.option('--output', 'output_file', type=click.Path(), required=True)
+def main(input_file, output_file):
+    data = da.read_df(input_file)
+    f, ax = plt.subplots()
 
-    f, ax = plt.subplots(1,1)
-
-    f.savefig(output_fpath)
+    f.savefig(output_file)
 
 if __name__ == '__main__':
     main()
