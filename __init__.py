@@ -8,6 +8,12 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import os
+import inspect
+import traceback
+from colorama import Fore, Style
+from collections import namedtuple
+import tempfile
+import sys
 
 """
 I finally want to work out common plots between all my scripts.
@@ -15,31 +21,99 @@ Common things that I want to use are
 - pdf/cdf/ccdf
 """
 
+class ConstraintChecker:
+    result_nt = namedtuple("result", ["success", "msg", "exception"])
+
+    @classmethod
+    def eprint(cls, msg):
+        print(msg, file=sys.stderr)
+
+    @classmethod
+    def print_results(cls, results, print_ex=True):
+        cls.eprint("")
+        cls.eprint("=======================================")
+        cls.eprint(Style.DIM + "Constraints: " + Style.RESET_ALL)
+        for result in results:
+            cls.eprint(result.msg)
+            if result.exception and print_ex:
+                print(result.exception)
+        cls.eprint("=======================================")
+        cls.eprint("")
+
+
+    @classmethod
+    def check_constraints(cls, constraints, verbose=False):
+        results = []
+        overall_status = True
+        for c in constraints:
+            msg = inspect.getsourcelines(c)[0][0]
+            msg = msg.split('lambda: ')[1].strip()
+            msg = msg[:-1] if msg.endswith(',') else msg
+            status = False
+            exception = None
+            try:
+                status = c()
+            except Exception as ex:
+                exception = repr(ex)
+            if exception:
+                msg = Fore.YELLOW + msg + Fore.RESET
+            elif status:
+                msg = Fore.GREEN + msg + Fore.RESET
+            else:
+                msg = Fore.RED + msg + Fore.RESET
+            overall_status = overall_status and status
+            results.append(cls.result_nt(status, msg, exception))
+
+        if not overall_status:
+            cls.print_results(results)
+            cls.eprint(Style.DIM + "ERROR: Some constraints failed!!" + Style.RESET_ALL)
+            return False
+        if verbose:
+            cls.print_results(results)
+        return True
+
+def savefig(f, fpath):
+    f.savefig(fpath, bbox_inches='tight')
+
 def pjoin(listo):
     return os.path.sep.join(listo)
 
 def convert_to_time(string):
     return pd.to_datetime(string, format="%Y-%m-%d %H:%M:%S.%f")
 
-def read_df(fpath):
+def read_df(fpath, **kwargs):
     print("Loading dataframe '{}'".format(fpath))
-    if fpath.endswith(".h5"):
-        return pd.read_hdf(fpath)
-    if fpath.endswith(".csv"):
-        return pd.read_csv(fpath)
-    if fpath.endswith(".pickle"):
-        return pd.read_pickle(fpath)
-    raise Exception("No reader for: " + fpath)
+    ext = os.path.splitext(fpath)[-1]
+    if ext == ".h5":
+        return pd.read_hdf(fpath, **kwargs)
+    if ext == ".csv":
+        return pd.read_csv(fpath, **kwargs)
+    if ext == ".pickle":
+        return pd.read_pickle(fpath, **kwargs)
+    raise Exception("No reader for: " + ext)
 
-def write_df(df, fpath):
+def _write_df(df, fpath, **kwargs):
     print("Writing dataframe '{}'".format(fpath))
-    if fpath.endswith(".h5"):
-        return df.to_hdf(fpath, "/data", format='table')
-    if fpath.endswith(".csv"):
-        return df.to_csv(fpath)
-    if fpath.endswith(".pickle"):
-        return df.to_pickle(fpath)
-    raise Exception("No writer for: " + fpath)
+    ext = os.path.splitext(fpath)[-1]
+    if ext == ".h5":
+        return df.to_hdf(fpath, "/data", format='table', append=False, **kwargs)
+    if ext == ".csv":
+        return df.to_csv(fpath, **kwargs)
+    if ext == ".pickle":
+        return df.to_pickle(fpath, **kwargs)
+    raise Exception("No writer for: " + ext)
+
+def write_df(df, fpath, constraints=None, **kwargs):
+    if constraints:
+        print("Checking constraints for '{}'".format(fpath))
+        if not ConstraintChecker.check_constraints(constraints):
+            ext = os.path.splitext(fpath)[-1]
+            tmppath = tempfile.mktemp(ext)
+            _write_df(df, tmppath)
+            return
+
+    _write_df(df, fpath)
+
 
 def pdf(data, col, count_col=None):
     if '__count' in data.columns:
