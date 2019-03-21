@@ -8,7 +8,7 @@
 
 [ -f ~/miniconda3/etc/profile.d/conda.sh ] && source ~/miniconda3/etc/profile.d/conda.sh
 [ -f ~/anaconda3/etc/profile.d/conda.sh ] && source ~/anaconda3/etc/profile.d/conda.sh
-conda create --file datalytics/templates/conda-spef-file.txt -n $(basename "$PWD")
+conda create --file datalytics/structure/configs/conda-spec-file.txt -n $(basename "$PWD")
 
 
 
