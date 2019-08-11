@@ -1,4 +1,4 @@
-configfile: "configs/snakemake.json"
+configfile: "configs/snakemake_scripts.json"
 
 import os
 import sys
