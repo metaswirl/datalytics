@@ -92,7 +92,6 @@ def add_tags_to_png_file(fpath):
         png_info = PngInfo()
         for k, v in info.items():
             png_info.add_text(k, v)
-        print(png_info.chunks)
         png_image.save(fpath, pnginfo=png_info)
     except Exception:
         print("WARNING: Could not add debug info to file '{}'.".format(fpath))
@@ -116,7 +115,6 @@ def add_tags_to_svg_file(fpath):
 
 def create_file_info(fpath):
     info = {}
-    info['file_author'] = subprocess.check_output('git config user.name'.split(' ')).strip().decode('utf-8')
     info['file_path'] = fpath
     info['git_commit_id'] = subprocess.check_output('git rev-parse HEAD'.split(' ')).strip().decode('utf-8')
     working_dir_state = subprocess.check_output('git status --porcelain'.split(' ')).strip().split(b'\n')
@@ -133,7 +131,7 @@ def savefig(f, fpath, tight=True):
     if fpath.endswith('png'):
         add_tags_to_png_file(fpath)
     if fpath.endswith('svg'):
-        add_tags_to_png_file(fpath)
+        add_tags_to_svg_file(fpath)
 
 def load_holoviews(fpath):
     from holoviews.core.io import Unpickler
@@ -271,15 +269,29 @@ def read_df(fpath, silent=False, **kwargs):
     ext = os.path.splitext(fpath)[-1]
     if ext == ".h5":
         store = pd.HDFStore(fpath)
-        df = store[HDF_NAMESPACE]
-        # metadata = store.get_storer(HDF_NAMESPACE).attrs.metadata
-        store.close()
+        try:
+            df = store[HDF_NAMESPACE]
+            # metadata = store.get_storer(HDF_NAMESPACE).attrs.metadata
+        except KeyError:
+            raise
+        finally:
+            store.close()
         return df
     if ext == ".csv":
         return pd.read_csv(fpath, **kwargs)
     if ext == ".pickle":
         return pd.read_pickle(fpath, **kwargs)
     raise Exception("No reader for: " + ext)
+
+def hdf_get_metadata(fpath):
+    store = pd.HDFStore(fpath)
+    try:
+        metadata = store.get_storer(HDF_NAMESPACE).attrs.metadata
+    except KeyError:
+        raise
+    finally:
+        store.close()
+    return metadata
 
 def _write_df(df, fpath, **kwargs):
     print("Writing dataframe '{}'".format(fpath))
@@ -290,10 +302,13 @@ def _write_df(df, fpath, **kwargs):
         store.put(HDF_NAMESPACE, df)
         store.get_storer(HDF_NAMESPACE).attrs.metadata = info
         store.close()
+        return
     if ext == ".csv":
         df.to_csv(fpath, **kwargs)
+        return
     if ext == ".pickle":
         df.to_pickle(fpath, **kwargs)
+        return
     raise Exception("No writer for: " + ext)
 
 def write_df(df, fpath, constraints=None, desc=False, **kwargs):
@@ -315,7 +330,6 @@ def write_df(df, fpath, constraints=None, desc=False, **kwargs):
             ext = os.path.splitext(fpath)[-1]
             tmp_path = tempfile.mktemp(ext)
             _write_df(df, tmp_path)
-            print(desc_new)
             raise Exception("ERROR: The format of the data frame changed. If intended please delete JSON file.")
 
         print("Writing description of dataframe '{}'".format(json_path))
