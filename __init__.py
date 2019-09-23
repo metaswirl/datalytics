@@ -5,6 +5,8 @@ from matplotlib import pyplot as plt
 from matplotlib import gridspec
 from matplotlib.colors import SymLogNorm, NoNorm
 
+from PIL.PngImagePlugin import PngImageFile, PngInfo
+import subprocess
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -18,6 +20,9 @@ import sys
 import json
 from collections import OrderedDict
 from datetime import datetime as dt
+import traceback
+import xml.etree.ElementTree as ElementTree
+import re
 
 """
 I finally want to work out common plots between all my scripts.
@@ -78,8 +83,55 @@ class ConstraintChecker:
             cls.print_results(results)
         return True
 
-def savefig(f, fpath):
-    f.savefig(fpath, bbox_inches='tight')
+def add_tags_to_png_file(fpath):
+    try:
+        info = create_file_info(fpath)
+        png_image = PngImageFile(open(fpath, 'rb'))
+        png_info = PngInfo()
+        for k, v in info.items():
+            png_info.add_text(k, v)
+        print(png_info.chunks)
+        png_image.save(fpath, pnginfo=png_info)
+    except Exception:
+        print("WARNING: Could not add debug info to file '{}'.".format(fpath))
+        traceback.print_exc()
+
+def add_tags_to_svg_file(fpath):
+    try:
+        ElementTree.register_namespace('xlink', "http://www.w3.org/1999/xlink")
+        et = ElementTree.parse(fpath)
+        root_ns = re.compile('\{([^}]+)\}.*').findall(et.getroot().tag)
+        ElementTree.register_namespace('', root_ns[0])
+        info = create_file_info(fpath)
+        for k, v in info.items():
+            new_tag = ElementTree.SubElement(et.getroot(), 'text')
+            new_tag.text = "{}: {}".format(k, v)
+            new_tag.attrib['style'] = 'font-size:0'
+        et.write(fpath)
+    except Exception:
+        print("WARNING: Could not add debug info to file '{}'.".format(fpath))
+        traceback.print_exc()
+
+def create_file_info(fpath):
+    info = {}
+    info['file_author'] = subprocess.check_output('git config user.name'.split(' ')).strip().decode('utf-8')
+    info['file_path'] = fpath
+    info['git_commit_id'] = subprocess.check_output('git rev-parse HEAD'.split(' ')).strip().decode('utf-8')
+    working_dir_state = subprocess.check_output('git status --porcelain'.split(' ')).strip().split(b'\n')
+    info['git_staged_count'] = str(sum([1 if x.startswith(b'M') else 0 for x in working_dir_state]))
+    info['git_not_staged_count'] = str(sum([1 if x.startswith(b' M') else 0 for x in working_dir_state]))
+    info['git_untracked_count'] = str(sum([1 if x.startswith(b'??') else 0 for x in working_dir_state]))
+    return info
+
+def savefig(f, fpath, tight=True):
+    if tight:
+        f.savefig(fpath, bbox_inches='tight')
+    else:
+        f.savefig(fpath)
+    if fpath.endswith('png'):
+        add_tags_to_png_file(fpath)
+    if fpath.endswith('svg'):
+        add_tags_to_png_file(fpath)
 
 def load_holoviews(fpath):
     from holoviews.core.io import Unpickler
