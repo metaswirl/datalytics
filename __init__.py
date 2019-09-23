@@ -30,6 +30,8 @@ Common things that I want to use are
 - pdf/cdf/ccdf
 """
 
+HDF_NAMESPACE = '/data'
+
 def eprint(msg):
     print(msg, file=sys.stderr)
 
@@ -268,7 +270,11 @@ def read_df(fpath, silent=False, **kwargs):
         print("Loading dataframe '{}'".format(fpath))
     ext = os.path.splitext(fpath)[-1]
     if ext == ".h5":
-        return pd.read_hdf(fpath, **kwargs)
+        store = pd.HDFStore(fpath)
+        df = store[HDF_NAMESPACE]
+        # metadata = store.get_storer(HDF_NAMESPACE).attrs.metadata
+        store.close()
+        return df
     if ext == ".csv":
         return pd.read_csv(fpath, **kwargs)
     if ext == ".pickle":
@@ -279,11 +285,15 @@ def _write_df(df, fpath, **kwargs):
     print("Writing dataframe '{}'".format(fpath))
     ext = os.path.splitext(fpath)[-1]
     if ext == ".h5":
-        return df.to_hdf(fpath, "/data", format='table', append=False, **kwargs)
+        info = create_file_info(fpath)
+        store = pd.HDFStore(fpath)
+        store.put(HDF_NAMESPACE, df)
+        store.get_storer(HDF_NAMESPACE).attrs.metadata = info
+        store.close()
     if ext == ".csv":
-        return df.to_csv(fpath, **kwargs)
+        df.to_csv(fpath, **kwargs)
     if ext == ".pickle":
-        return df.to_pickle(fpath, **kwargs)
+        df.to_pickle(fpath, **kwargs)
     raise Exception("No writer for: " + ext)
 
 def write_df(df, fpath, constraints=None, desc=False, **kwargs):
