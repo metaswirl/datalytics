@@ -268,15 +268,7 @@ def read_df(fpath, silent=False, **kwargs):
         print("Loading dataframe '{}'".format(fpath))
     ext = os.path.splitext(fpath)[-1]
     if ext == ".h5":
-        store = pd.HDFStore(fpath)
-        try:
-            df = store[HDF_NAMESPACE]
-            # metadata = store.get_storer(HDF_NAMESPACE).attrs.metadata
-        except KeyError:
-            raise
-        finally:
-            store.close()
-        return df
+        return pd.read_hdf(fpath)
     if ext == ".csv":
         return pd.read_csv(fpath, **kwargs)
     if ext == ".pickle":
@@ -299,7 +291,7 @@ def _write_df(df, fpath, **kwargs):
     if ext == ".h5":
         info = create_file_info(fpath)
         store = pd.HDFStore(fpath)
-        store.put(HDF_NAMESPACE, df)
+        store.put(HDF_NAMESPACE, df, format='table')
         store.get_storer(HDF_NAMESPACE).attrs.metadata = info
         store.close()
         return
