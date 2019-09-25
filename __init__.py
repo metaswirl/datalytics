@@ -8,6 +8,7 @@ from matplotlib.colors import SymLogNorm, NoNorm
 from PIL.PngImagePlugin import PngImageFile, PngInfo
 import subprocess
 import numpy as np
+import matplotlib
 import pandas as pd
 import seaborn as sns
 import os
@@ -123,15 +124,40 @@ def create_file_info(fpath):
     info['git_untracked_count'] = str(sum([1 if x.startswith(b'??') else 0 for x in working_dir_state]))
     return info
 
-def savefig(f, fpath, tight=True):
+
+def savefig(f: matplotlib.figure.Figure, fpath: str, tight: bool=True, details: str=None):
     if tight:
+        if details:
+            add_parameter_details(f, details, -0.1)
         f.savefig(fpath, bbox_inches='tight')
     else:
+        if details:
+            f.subplots_adjust(bottom=0.2)
+            add_parameter_details(f, details, 0.1)
         f.savefig(fpath)
     if fpath.endswith('png'):
         add_tags_to_png_file(fpath)
     if fpath.endswith('svg'):
         add_tags_to_svg_file(fpath)
+
+
+def add_parameter_details(f: matplotlib.figure.Figure, details: str, y: float):
+    if not details:
+        return
+    string = ""
+    elements = ["{} = {}".format(k, v) for k, v in json.loads(details).items()]
+    acc = 0
+    for el in elements[:-1]:
+        string = string + el + ','
+        acc += len(el) + 2
+        if acc > 60:
+            string = string + '\n'
+            acc = 0
+        else:
+            string = string + ' '
+    string += elements[-1]
+    f.text(0.05, y, string)
+
 
 def load_holoviews(fpath):
     from holoviews.core.io import Unpickler
