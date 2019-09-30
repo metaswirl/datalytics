@@ -128,7 +128,7 @@ def create_file_info(fpath):
 def savefig(f: matplotlib.figure.Figure, fpath: str, tight: bool=True, details: str=None):
     if tight:
         if details:
-            add_parameter_details(f, details, -0.1)
+            add_parameter_details(f, details, -0.4)
         f.savefig(fpath, bbox_inches='tight')
     else:
         if details:
@@ -464,7 +464,7 @@ def heatmap_test_data(ncols=3, nrows=10, log=False):
     return pd.melt(d, id_vars="time")
 
 def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
-        carryover=False, draw_bars=True, **kwargs):
+        carryover=False, draw_bars=True, cmap='CMRmap', **kwargs):
     """ Plot a heatmap with barcharts on the side
         key1, key2 - keys of the x and y dimension
     """
@@ -477,7 +477,6 @@ def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
         ax.yaxis.set_visible(False)
 
     #cmap = "YlGnBu"
-    cmap = "CMRmap"
     bar_col = "silver"
 
 
@@ -502,7 +501,6 @@ def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
         matrix = matrix.fillna(method='ffill')
     else:
         matrix = matrix.fillna(0)
-    print("matrix.shape={}".format(matrix.shape))
 
     if draw_bars:
         top = data.groupby(key1)[values].sum()
