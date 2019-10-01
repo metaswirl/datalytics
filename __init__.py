@@ -125,16 +125,16 @@ def create_file_info(fpath):
     return info
 
 
-def savefig(f: matplotlib.figure.Figure, fpath: str, tight: bool=True, details: str=None):
+def savefig(f: matplotlib.figure.Figure, fpath: str, tight: bool=True, details: str=None, **kwargs):
     if tight:
         if details:
             add_parameter_details(f, details, -0.4)
-        f.savefig(fpath, bbox_inches='tight')
+        f.savefig(fpath, bbox_inches='tight', **kwargs)
     else:
         if details:
             f.subplots_adjust(bottom=0.2)
             add_parameter_details(f, details, 0.1)
-        f.savefig(fpath)
+        f.savefig(fpath, **kwargs)
     if fpath.endswith('png'):
         add_tags_to_png_file(fpath)
     if fpath.endswith('svg'):
