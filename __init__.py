@@ -286,10 +286,12 @@ def equal_desc(dict_old, dict_new):
         return False
     return True
 
+
 def convert_to_time(string):
     return pd.to_datetime(string, format="%Y-%m-%d %H:%M:%S.%f")
 
-def read_df(fpath, silent=False, **kwargs):
+
+def read_df(fpath: str, silent: bool=False, **kwargs):
     if not silent:
         print("Loading dataframe '{}'".format(fpath))
     ext = os.path.splitext(fpath)[-1]
@@ -311,7 +313,7 @@ def hdf_get_metadata(fpath):
         store.close()
     return metadata
 
-def _write_df(df, fpath, **kwargs):
+def _write_df(df: pd.DataFrame, fpath: str, **kwargs):
     print("Writing dataframe '{}'".format(fpath))
     ext = os.path.splitext(fpath)[-1]
     if ext == ".h5":
