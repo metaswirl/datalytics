@@ -94,7 +94,7 @@ def add_tags_to_png_file(fpath):
         for k, v in info.items():
             png_info.add_text(k, v)
         png_image.save(fpath, pnginfo=png_info)
-    except Exception:
+    except (Exception, OSError):
         print("WARNING: Could not add debug info to file '{}'.".format(fpath))
         traceback.print_exc()
 
@@ -490,7 +490,7 @@ def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
         ax_right = plt.subplot(gs[1,1], frameon=False)
         ax_right2 = plt.subplot(gs[1,2], frameon=False, sharex=ax_center)
     else:
-        fig = plt.figure(frameon=False)
+        fig = plt.figure()
         gs = gridspec.GridSpec(2, 1, height_ratios=[9, 1], width_ratios = [1], figure=fig)
         ax_center = plt.subplot(gs[0,0], frameon=False)
         ax_right2 = plt.subplot(gs[1,0], frameon=False)
@@ -550,7 +550,7 @@ def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
         disable_ticks(ax_center)
 
         fig.tight_layout(pad = 0)
-        fig.patch.set_visible(False)
+        #fig.patch.set_visible(False)
         return fig, [ax_center], None
 
 
