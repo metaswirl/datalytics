@@ -102,7 +102,7 @@ def add_tags_to_svg_file(fpath):
     try:
         ElementTree.register_namespace('xlink', "http://www.w3.org/1999/xlink")
         et = ElementTree.parse(fpath)
-        root_ns = re.compile('\{([^}]+)\}.*').findall(et.getroot().tag)
+        root_ns = re.compile(r'\{([^}]+)\}.*').findall(et.getroot().tag)
         ElementTree.register_namespace('', root_ns[0])
         info = create_file_info(fpath)
         for k, v in info.items():
