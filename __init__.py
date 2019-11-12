@@ -4,7 +4,6 @@ if platform.python_version_tuple()[0] != '3':
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 from matplotlib.colors import SymLogNorm, NoNorm
-
 from PIL.PngImagePlugin import PngImageFile, PngInfo
 import subprocess
 import numpy as np
@@ -31,17 +30,20 @@ Common things that I want to use are
 - pdf/cdf/ccdf
 """
 
+
 HDF_NAMESPACE = '/data'
+
 
 def eprint(msg):
     print(msg, file=sys.stderr)
 
+
 def eprint_red(cls, msg):
     eprint(Style.DIM + "ERROR: " + msg + Style.RESET_ALL)
 
+
 class ConstraintChecker:
     result_nt = namedtuple("result", ["success", "msg", "exception"])
-
 
     @classmethod
     def print_results(cls, results, print_ex=True):
@@ -54,7 +56,6 @@ class ConstraintChecker:
                 print(result.exception)
         eprint("=======================================")
         eprint("")
-
 
     @classmethod
     def check_constraints(cls, constraints, verbose=False):
@@ -86,6 +87,7 @@ class ConstraintChecker:
             cls.print_results(results)
         return True
 
+
 def add_tags_to_png_file(fpath):
     try:
         info = create_file_info(fpath)
@@ -97,6 +99,7 @@ def add_tags_to_png_file(fpath):
     except (Exception, OSError):
         print("WARNING: Could not add debug info to file '{}'.".format(fpath))
         traceback.print_exc()
+
 
 def add_tags_to_svg_file(fpath):
     try:
@@ -114,8 +117,9 @@ def add_tags_to_svg_file(fpath):
         print("WARNING: Could not add debug info to file '{}'.".format(fpath))
         traceback.print_exc()
 
+
 def create_file_info(fpath):
-    info = {}
+    info = dict()
     info['file_path'] = fpath
     info['git_commit_id'] = subprocess.check_output('git rev-parse HEAD'.split(' ')).strip().decode('utf-8')
     working_dir_state = subprocess.check_output('git status --porcelain'.split(' ')).strip().split(b'\n')
@@ -125,10 +129,10 @@ def create_file_info(fpath):
     return info
 
 
-def savefig(f: matplotlib.figure.Figure, fpath: str, tight: bool=True, details: str=None, **kwargs):
+def savefig(f: matplotlib.figure.Figure, fpath: str, tight: bool = True, details: str = None, space: float = 0.0, **kwargs):
     if tight:
         if details:
-            add_parameter_details(f, details, -0.4)
+            add_parameter_details(f, details, -0.4 + space)
         f.savefig(fpath, bbox_inches='tight', **kwargs)
     else:
         if details:
@@ -162,6 +166,7 @@ def add_parameter_details(f: matplotlib.figure.Figure, details: str, y: float):
 def load_holoviews(fpath):
     from holoviews.core.io import Unpickler
     return Unpickler.load(fpath)
+
 
 def save_holoviews(fpath, obj, save_components=False, save_doc=False, save_html=True, save_pickle=False, save_item=False):
     from holoviews.core.io import Pickler
@@ -208,8 +213,10 @@ def save_holoviews(fpath, obj, save_components=False, save_doc=False, save_html=
         print("saving {}.html".format(fpath))
         hv.save(obj, fpath + ".html")
 
+
 def pjoin(listo):
     return os.path.sep.join(listo)
+
 
 def create_desc(df):
     return OrderedDict([
@@ -224,12 +231,14 @@ def create_desc(df):
         ('descending_index', df.index.is_monotonic_decreasing)
     ])
 
+
 def write_desc(dicto, fpath):
     try:
         with open(fpath, 'w') as f:
             json.dump(dicto, f)
     except:
         eprint("Could not write description file.")
+
 
 def load_desc(fpath):
     fail = False
@@ -241,12 +250,14 @@ def load_desc(fpath):
             fail = True
     return None, fail
 
+
 def write_desc(dicto, fpath):
     try:
         with open(fpath, 'w') as f:
             json.dump(dicto, f, indent=2)
     except:
         eprint("Could not write description file.")
+
 
 def equal_desc(dict_old, dict_new):
     if len(set(dict_old.keys()).symmetric_difference(set(dict_new.keys()))) > 0:
@@ -291,7 +302,7 @@ def convert_to_time(string):
     return pd.to_datetime(string, format="%Y-%m-%d %H:%M:%S.%f")
 
 
-def read_df(fpath: str, silent: bool=False, **kwargs):
+def read_df(fpath: str, silent: bool = False, **kwargs):
     if not silent:
         print("Loading dataframe '{}'".format(fpath))
     ext = os.path.splitext(fpath)[-1]
@@ -303,6 +314,7 @@ def read_df(fpath: str, silent: bool=False, **kwargs):
         return pd.read_pickle(fpath, **kwargs)
     raise Exception("No reader for: " + ext)
 
+
 def hdf_get_metadata(fpath):
     store = pd.HDFStore(fpath)
     try:
@@ -312,6 +324,7 @@ def hdf_get_metadata(fpath):
     finally:
         store.close()
     return metadata
+
 
 def _write_df(df: pd.DataFrame, fpath: str, **kwargs):
     print("Writing dataframe '{}'".format(fpath))
@@ -330,6 +343,7 @@ def _write_df(df: pd.DataFrame, fpath: str, **kwargs):
         df.to_pickle(fpath, **kwargs)
         return
     raise Exception("No writer for: " + ext)
+
 
 def write_df(df, fpath, constraints=None, desc=False, **kwargs):
     if constraints:
@@ -374,6 +388,7 @@ def pdf(data, col, count_col=None):
         res = res.sum() / total
     return res
 
+
 def cdf(data, col, count_col=None):
     if '__count' in data.columns:
         raise Exception("__count already exists")
@@ -389,6 +404,7 @@ def cdf(data, col, count_col=None):
         res = res.sum() / total
     res = res.cumsum()
     return res
+
 
 def plotme(series, ax=None, ylog=True, xlog=False, loglog=False,
         linestyle="-", marker="", set_ylim=True, **kwargs):
@@ -415,11 +431,13 @@ def plotme(series, ax=None, ylog=True, xlog=False, loglog=False,
 
     return ax
 
+
 def plot_pdf(data, col, *args, **kwargs):
     res = pdf(data, col)
     ax = plotme(res, *args, marker="o", **kwargs)
     ax.set_title("PDF")
     return ax
+
 
 def plot_cdf(data, col, *args, **kwargs):
     res = cdf(data, col)
@@ -427,16 +445,18 @@ def plot_cdf(data, col, *args, **kwargs):
     ax.set_title("ECDF")
     return ax
 
+
 def plot_multi_cdf(data, cols, *args, **kwargs):
     ax = None
     for col in cols:
         d = cdf(data, col)
         ax = plotme(d, *args, ax=ax, label=col, **kwargs)
-    lines = ax.get_lines()# + ax.right_ax.get_lines()
+    lines = ax.get_lines() # + ax.right_ax.get_lines()
     ax.legend(lines, [l.get_label() for l in lines], loc='lower right')
     ax.set_xlabel("variable")
     ax.set_title("CDF")
     return ax
+
 
 def plot_ccdf(data, col, *args, **kwargs):
     res = 1-cdf(data, col)
@@ -444,15 +464,18 @@ def plot_ccdf(data, col, *args, **kwargs):
     ax.set_title("CCDF")
     return ax
 
+
 def top(data, key_col, value_col, n=10):
     return data.sort_values(value_col, ascending=False).reset_index(drop=True).head(n)
+
 
 def plot_top(data, key_col, value_col, n=10):
     res = top(data, key_col, value_col, n=n)
     ax = res[value_col].plot()
-    fig.tight_layout(pad = 0)
-    fig.patch.set_visible(False)
+    #fig.tight_layout(pad = 0)
+    #fig.patch.set_visible(False)
     return ax
+
 
 def heatmap_test_data(ncols=3, nrows=10, log=False):
     """ Create test data for heatmap with keys 'time' and 'variable'
@@ -465,16 +488,18 @@ def heatmap_test_data(ncols=3, nrows=10, log=False):
     d['time'] = pd.date_range("1/1/2018", periods=nrows, freq='H')
     return pd.melt(d, id_vars="time")
 
+
 def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
-        carryover=False, draw_bars=True, cmap='CMRmap', **kwargs):
+        carryover=False, draw_bars=True, cmap='CMRmap', disable_axes=True, **kwargs):
     """ Plot a heatmap with barcharts on the side
         key1, key2 - keys of the x and y dimension
     """
-    def disable_ticks(ax):
+
+    def do_disable_ticks(ax):
         ax.xaxis.set_major_locator(plt.NullLocator())
         ax.yaxis.set_major_locator(plt.NullLocator())
 
-    def disable_axes(ax):
+    def do_disable_axes(ax):
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
 
@@ -510,6 +535,7 @@ def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
 
     # plot
     hm_data = matrix.T
+    hm_data = hm_data.sort_index(ascending=False)
     if log:
         norm = SymLogNorm(vmin=hm_data.min().min(), vmax=hm_data.max().max(),
                 linthresh=1)
@@ -531,10 +557,10 @@ def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
         ax_center.set_ylabel(ylabel)
 
         # remove axes and ticks where possible
-        disable_axes(ax_right2)
-        disable_axes(ax_top)
-        disable_axes(ax_right)
-        disable_ticks(ax_center)
+        do_disable_axes(ax_right2)
+        do_disable_axes(ax_top)
+        do_disable_axes(ax_right)
+        do_disable_ticks(ax_center)
 
         # remove spaces
         fig.tight_layout(pad = 0)
@@ -548,8 +574,9 @@ def heatmap(data, key1, key2, values='value', xlabel="", ylabel="", log=False,
         ax_center.set_ylabel(ylabel)
 
         # remove axes and ticks where possible
-        disable_axes(ax_right2)
-        disable_ticks(ax_center)
+        if disable_axes:
+            do_disable_axes(ax_right2)
+        #do_disable_ticks(ax_center)
 
         fig.tight_layout(pad = 0)
         #fig.patch.set_visible(False)
