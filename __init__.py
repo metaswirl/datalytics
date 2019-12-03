@@ -307,11 +307,17 @@ def read_df(fpath: str, silent: bool = False, **kwargs):
         print("Loading dataframe '{}'".format(fpath))
     ext = os.path.splitext(fpath)[-1]
     if ext == ".h5":
-        return pd.read_hdf(fpath)
+        try:
+            data = pd.read_hdf(fpath)
+            return data
+        except ValueError:
+            print("WARNING: Empty data file")
+            return None
     if ext == ".csv":
         return pd.read_csv(fpath, **kwargs)
     if ext == ".pickle":
         return pd.read_pickle(fpath, **kwargs)
+    print(f"'{ext}'")
     raise Exception("No reader for: " + ext)
 
 
@@ -332,8 +338,16 @@ def _write_df(df: pd.DataFrame, fpath: str, **kwargs):
     if ext == ".h5":
         info = create_file_info(fpath)
         store = pd.HDFStore(fpath)
-        store.put(HDF_NAMESPACE, df, format='table')
-        store.get_storer(HDF_NAMESPACE).attrs.metadata = info
+
+        try:
+            store.put(HDF_NAMESPACE, df, format='table', data_columns=list(df.columns))
+        except IndexError:
+            print(f"WARNING: Somehow this file could not be saved in a clean way. Trying dirty way.")
+            store.put(HDF_NAMESPACE, df, format='table')
+        try:
+            store.get_storer(HDF_NAMESPACE).attrs.metadata = info
+        except KeyError:
+            print(f"WARNING: You might write empty data to {fpath}.")
         store.close()
         return
     if ext == ".csv":
