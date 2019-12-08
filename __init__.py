@@ -23,6 +23,9 @@ from datetime import datetime as dt
 import traceback
 import xml.etree.ElementTree as ElementTree
 import re
+import tables
+import warnings
+warnings.simplefilter('ignore', tables.NaturalNameWarning)
 
 """
 I finally want to work out common plots between all my scripts.
