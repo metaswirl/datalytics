@@ -359,6 +359,8 @@ def _write_df(df: pd.DataFrame, fpath: str, **kwargs):
     if ext == ".pickle":
         df.to_pickle(fpath, **kwargs)
         return
+    if ext == "":
+        raise Exception("No file extension was provided.")
     raise Exception("No writer for: " + ext)
 
 
