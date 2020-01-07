@@ -311,7 +311,8 @@ def read_df(fpath: str, silent: bool = False, **kwargs):
     ext = os.path.splitext(fpath)[-1]
     if ext == ".h5":
         try:
-            data = pd.read_hdf(fpath)
+            with open(fpath, 'rb') as f:
+                data = pd.read_hdf(f)
             return data
         except ValueError:
             print("WARNING: Empty data file")
