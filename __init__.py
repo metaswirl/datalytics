@@ -317,6 +317,13 @@ def read_df(fpath: str, silent: bool = False, **kwargs):
         except ValueError:
             print("WARNING: Empty data file")
             return None
+        except NotImplementedError:
+            try:
+                data = pd.read_hdf(fpath)
+                return data
+            except ValueError:
+                print("WARNING: Empty data file")
+                return None
     if ext == ".csv":
         return pd.read_csv(fpath, **kwargs)
     if ext == ".pickle":
