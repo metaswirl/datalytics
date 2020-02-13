@@ -305,6 +305,18 @@ def convert_to_time(string):
     return pd.to_datetime(string, format="%Y-%m-%d %H:%M:%S.%f")
 
 
+def groupby_apply_array(data, groupby_column, apply_fun):
+    def new_apply_fun(group):
+        result = apply_fun(group)
+        if isinstance(result, pd.Series):
+            result.index = group.index # Not tested
+        elif isinstance(result, np.ndarray) or isinstance(result, list):
+            return pd.Series(result, index=group.index)
+        else:
+            raise Exception(f"Does not work for type {type(result)}.")
+    return data.groupby(groupby_column).apply(new_apply_fun).reset_index(groupby_column, drop=True)
+
+
 def read_df(fpath: str, silent: bool = False, **kwargs):
     if not silent:
         print("Loading dataframe '{}'".format(fpath))
